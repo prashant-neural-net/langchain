@@ -16,3 +16,4 @@ model = ChatHuggingFace(llm=llm)
 res = model.invoke("radhe radhe")
 
 print(res.content)
+
