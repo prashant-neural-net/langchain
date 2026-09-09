@@ -1,7 +1,6 @@
 import os
 from dotenv import load_dotenv
 from openai import OpenAI
-import json
 
 load_dotenv()
 
@@ -11,7 +10,6 @@ response = client.chat.completions.create(
     model="llama3.2:3b",
     messages=[{"role": "user", "content": "what is dependency injection in fastapi"}],
     stream=True,
-    
 )
 
 
@@ -21,3 +19,4 @@ for chunk in response:
         if content:
             print(content, end="", flush=True)
 print()
+
