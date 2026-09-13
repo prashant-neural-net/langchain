@@ -1,19 +1,20 @@
-from langchain_huggingface import ChatHuggingFace, HuggingFaceEndpoint
 from dotenv import load_dotenv
-import os
+from langchain_huggingface import ChatHuggingFace, HuggingFaceEndpoint
+from rich.console import Console
+from rich.markdown import Markdown
+from rich.panel import Panel
 
 load_dotenv()
+console = Console()
 
 llm = HuggingFaceEndpoint(
-    repo_id="openai/gpt-oss-120b",
+    repo_id="deepseek-ai/DeepSeek-V4.1-Flash",
     task="text-generation",
     provider="auto",
-    max_new_tokens=100,
-    temperature=0.5,
+    temperature=0,
 )
 model = ChatHuggingFace(llm=llm)
 
-res = model.invoke("radhe radhe")
+res = model.invoke("hi what is the capital of south africa")
 
-print(res.content)
-
+console.print(Panel(Markdown(res.content)))

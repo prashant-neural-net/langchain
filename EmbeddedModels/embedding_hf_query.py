@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-embedding = HuggingFaceEndpointEmbeddings(model="sentence-transformers/all-MiniLM-L6-v2")
+embedding = HuggingFaceEndpointEmbeddings(model="deepseek-ai/DeepSeek-V4.1-Flash")
 
 embedding.embed_query("Delhi is the capital of india")
 
