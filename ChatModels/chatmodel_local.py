@@ -18,13 +18,15 @@ import sqlite3
 
 from ..Cache.sqlite_cache import SQLiteCache
 from ..Cache.generate_key import create_cache_key
+from ..Cache.redis_cache import RedisCache
 
 load_dotenv()
 
 console = Console()
 app = typer.Typer()
 
-cache = SQLiteCache("cache.db")
+# cache = SQLiteCache("cache.db")
+cache = RedisCache()
 model_name = "llama3.2:3b"
 
 chat_model = ChatOpenAI(model=model_name, base_url=os.environ["Base_Url"], temperature=0)

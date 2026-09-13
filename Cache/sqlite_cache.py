@@ -1,9 +1,9 @@
 import sqlite3
 from pathlib import Path
 from typing import Optional
+from .base_class import BaseCache
 
-
-class SQLiteCache:
+class SQLiteCache(BaseCache):
     def __init__(self, database_path: str="cache.db"):
         self.database_path = Path(database_path)
         self._initialize_db()
