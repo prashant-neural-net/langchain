@@ -1,4 +1,5 @@
 import os
+
 from dotenv import load_dotenv
 from openai import OpenAI
 
@@ -19,4 +20,3 @@ for chunk in response:
         if content:
             print(content, end="", flush=True)
 print()
-

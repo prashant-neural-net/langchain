@@ -7,14 +7,18 @@ from langchain_openai import ChatOpenAI
 from rich.console import Console
 from rich.markdown import Markdown
 from rich.panel import Panel
+from typing import TypedDict, Annotated
 
 load_dotenv()
 
 model_name = "llama3.2:3b"
 
+
 chat_model = ChatOpenAI(
     model=model_name, base_url=os.environ["Base_Url"], temperature=0.0
 )
+
+
 
 console = Console()
 
@@ -57,3 +61,4 @@ while True:
     with open("chatbot_history.txt", "a") as f:
         f.writelines(f"HumanMessage(content='{new_lines[0]}')\n")
         f.writelines(f"AIMessage(content='{new_lines[1]}')\n")
+
