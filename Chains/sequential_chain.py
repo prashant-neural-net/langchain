@@ -1,7 +1,7 @@
-from langchain_core.prompts import PromptTemplate
-from langchain_core.output_parsers import StrOutputParser
 from dotenv import load_dotenv
-from langchain_huggingface import HuggingFaceEndpoint, ChatHuggingFace
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.prompts import PromptTemplate
+from langchain_huggingface import ChatHuggingFace, HuggingFaceEndpoint
 
 load_dotenv()
 
@@ -14,23 +14,19 @@ llm = HuggingFaceEndpoint(
 model = ChatHuggingFace(llm=llm)
 
 prompt_1 = PromptTemplate(
-    template="write a 20 line essay on {topic} \n",
-    input_variables=['topic']
+    template="write a 20 line essay on {topic} \n", input_variables=["topic"]
 )
 
 prompt_2 = PromptTemplate(
-    template="summarize this essay in 5 line: {text} \n",
-    input_variables=['text']
+    template="summarize this essay in 5 line: {text} \n", input_variables=["text"]
 )
 
 parser = StrOutputParser()
 
-chain = prompt_1 | model | parser |  prompt_2 | model | parser
+chain = prompt_1 | model | parser | prompt_2 | model | parser
 
-result = chain.invoke({'topic':'football'})
+result = chain.invoke({"topic": "football"})
 
 print(result)
 
 chain.get_graph().print_ascii()
-
-
