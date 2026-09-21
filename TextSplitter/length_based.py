@@ -1,79 +1,12 @@
+from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import CharacterTextSplitter
 
-text = """FOOTBALL
+loader = PyPDFLoader("football.pdf")
 
-Football is one of the most popular sports in the world. It is played between two teams, with each team usually having eleven players on the field. The main objective is to score more goals than the opposing team.
+docs = loader.load()
 
-A football match is normally divided into two halves of 45 minutes each. There is a short break between the halves. The referee controls the match and can award free kicks, penalties, yellow cards, and red cards depending on the situation.
+splitter = CharacterTextSplitter(chunk_size=9, chunk_overlap=0, separator="")
 
-POSITIONS
+result = splitter.split_documents(docs)
 
-Goalkeeper:
-The goalkeeper is responsible for protecting the goal. The goalkeeper is the only player who can normally use their hands inside their own penalty area.
-
-Defender:
-Defenders try to stop opposing players from creating scoring opportunities. Centre-backs usually defend the middle of the pitch, while full-backs operate closer to the sides.
-
-Midfielder:
-Midfielders connect the defensive and attacking parts of the team. Some midfielders focus on defending, while others create chances and control the tempo of the game.
-
-Forward:
-Forwards are mainly responsible for creating and scoring goals. A striker usually plays close to the opponent's goal.
-
-PASSING
-
-Passing is one of the fundamental skills in football. Short passing can help a team maintain possession, while long passing can quickly move the ball into dangerous areas.
-
-A through ball is a pass played into space behind the defenders so that an attacking player can run onto it.
-
-DRIBBLING
-
-Dribbling is the skill of moving with the ball while maintaining control. A successful dribble can allow a player to move past an opponent and create space for a shot or pass.
-
-SHOOTING
-
-Players can shoot with different parts of their feet depending on the situation. A powerful shot can be useful from distance, while a controlled shot can be more effective when close to the goal.
-
-TACTICS
-
-Teams use different tactical formations depending on their style of play. Common formations include 4-3-3, 4-4-2, and 3-5-2.
-
-In a 4-3-3 formation, there are four defenders, three midfielders, and three forwards. This formation can provide width through the wingers and allow the midfielders to support both attack and defence.
-
-PRESSING
-
-Pressing is a defensive strategy in which players try to put pressure on opponents when they have the ball. High pressing attempts to win the ball close to the opponent's goal.
-
-COUNTERATTACK
-
-A counterattack happens when a team quickly moves forward after winning possession. The team tries to exploit the space left by opponents who have moved forward to attack.
-
-MAJOR COMPETITIONS
-
-The FIFA World Cup is one of the most important international football competitions. National teams compete for the World Cup trophy.
-
-The UEFA Champions League is a major European club competition. Top clubs from European leagues compete against each other during the tournament.
-
-Football leagues are also played in many countries. Examples include the Premier League in England, La Liga in Spain, Serie A in Italy, Bundesliga in Germany, and Ligue 1 in France.
-
-FAMOUS PLAYERS
-
-Football has produced many famous players throughout its history. Players such as Lionel Messi, Cristiano Ronaldo, Pelé, Diego Maradona, Zinedine Zidane, and Johan Cruyff have had major impacts on the sport.
-
-Different players are known for different abilities. Some are famous for scoring goals, while others are known for passing, defending, dribbling, or creating chances.
-
-WHY PEOPLE LIKE FOOTBALL
-
-Football is easy to understand at a basic level because the main objective is simple: score more goals than the opponent.
-
-The sport also requires teamwork, communication, physical fitness, tactical awareness, and individual skill. These different elements make football interesting to watch and play."""
-
-splitter = CharacterTextSplitter(
-    chunk_size = 100,
-    chunk_overlap = 0,
-    separator = ''
-)
-
-result = splitter.split_text(text)
-
-print(result)
+print(result[100].page_content)
