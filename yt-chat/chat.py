@@ -3,7 +3,7 @@ import os
 from dotenv import load_dotenv
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 from langchain_core.output_parsers import StrOutputParser
-from langchain_core.prompts import PromptTemplate
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_huggingface import HuggingFaceEndpointEmbeddings
 from langchain_openai import ChatOpenAI
 from rich.console import Console
@@ -24,9 +24,15 @@ emb_model = HuggingFaceEndpointEmbeddings(
     repo_id="Qwen/Qwen3-Embedding-0.6B", provider="auto"
 )
 
-prompt = PromptTemplate(
-    template="""If you cant find the answer from the text reply that the text does not mention the query otherwise answer th question in short form -> question: {user_input} from this: {context}""",
-    input_variables=["user_input", "context"],
+prompt = ChatPromptTemplate.from_messages(
+    [
+        (
+            "system",
+            """If you cant find the answer from the text reply that the text does not mention the query otherwise answer th question in short form from this Transcript -> {transcript}\n""",
+        ),
+        MessagesPlaceholder(variable_name="history"),
+        ("human", "{user_input}"),
+    ]
 )
 
 api = YouTubeTranscriptApi()
@@ -38,14 +44,13 @@ transcript = "".join(chunk.text for chunk in transcript_list)
 
 chain = prompt | chat_model | parser
 
-response = ""
 context = []
 context.append(SystemMessage(content=transcript))
 while True:
+    response = ""
     user_input = console.input("query: ")
     if user_input in ["/exit", "/quit"]:
         break
-    context.append(HumanMessage(content=user_input))
     with Live(
         Panel(
             Markdown("Generating......"),
@@ -55,7 +60,9 @@ while True:
         console=console,
         refresh_per_second=10,
     ) as live:
-        for chunk in chain.stream({"user_input": user_input, "context": context}):
+        for chunk in chain.stream(
+            {"user_input": user_input, "history": context, "transcript": transcript}
+        ):
             response += chunk
 
             live.update(
@@ -65,4 +72,5 @@ while True:
                     title=f"Generated Response via {local_model_name}",
                 ),
             )
-        context.append(AIMessage(content=response))
+    context.append(HumanMessage(content=user_input))
+    context.append(AIMessage(content=response))
