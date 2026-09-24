@@ -1,4 +1,5 @@
 import os
+import sys
 
 from dotenv import load_dotenv
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
@@ -6,11 +7,14 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_huggingface import HuggingFaceEndpointEmbeddings
 from langchain_openai import ChatOpenAI
+from langchain_qdrant import QdrantVectorStore
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from qdrant_client import QdrantClient
 from rich.console import Console
 from rich.live import Live
 from rich.markdown import Markdown
 from rich.panel import Panel
-from youtube_transcript_api import YouTubeTranscriptApi
+from youtube_transcript_api import TranscriptsDisabled, YouTubeTranscriptApi
 
 console = Console()
 load_dotenv()
@@ -21,8 +25,9 @@ chat_model = ChatOpenAI(
 )
 
 emb_model = HuggingFaceEndpointEmbeddings(
-    repo_id="Qwen/Qwen3-Embedding-0.6B", provider="auto"
+    repo_id="BAAI/bge-small-en-v1.5", provider="auto"
 )
+splitter = RecursiveCharacterTextSplitter(chunk_size=200, chunk_overlap=20)
 
 prompt = ChatPromptTemplate.from_messages(
     [
@@ -37,11 +42,33 @@ prompt = ChatPromptTemplate.from_messages(
 
 api = YouTubeTranscriptApi()
 parser = StrOutputParser()
+client = QdrantClient(url="http://localhost:6333")
 
-transcript_list = api.fetch(video_id="kYfNvmF0Bqw", languages=["en"])
 
-transcript = "".join(chunk.text for chunk in transcript_list)
+video_id = "kYfNvmF0Bqw"
+try:
+    transcript_list = api.fetch(video_id="kYfNvmF0Bqw", languages=["en"])
 
+    transcript = "".join(chunk.text for chunk in transcript_list)
+
+except TranscriptsDisabled:
+    print("No captions available for this video")
+
+chunks = splitter.create_documents([transcript])
+
+vector_store = QdrantVectorStore.from_documents(
+    documents=chunks,
+    embedding=emb_model,
+    url="http://localhost:6333",
+    collection_name="youtube_transcript",
+)
+
+retriever = vector_store.as_retriever(search_type="mmr", search_kwargs={"k": 4})
+docs = retriever.invoke("the minute you poke life")
+for doc in docs:
+    print(doc.page_content, end="\n\n\n\n")
+if True:
+    sys.exit("after prompt")
 chain = prompt | chat_model | parser
 
 context = []
@@ -49,7 +76,7 @@ context.append(SystemMessage(content=transcript))
 while True:
     response = ""
     user_input = console.input("query: ")
-    if user_input in ["/exit", "/quit"]:
+    if user_input.lower() in ["/exit", "/quit"]:
         break
     with Live(
         Panel(
